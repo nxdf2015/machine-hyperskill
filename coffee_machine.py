@@ -37,19 +37,6 @@ def fill_machine():
      }
 
 
-def verify(n,ingredients):
-    """
-    verify if it is possble to make n cups with ingredients available
-    """
-
-    m= min(ingredients["water"]//200 , ingredients["milk"]//50 , ingredients["bean"]//15)
-    if m < n:
-        print(f"No, I can make only {m} cups of coffee")
-    elif m == n:
-        print("Yes, I can make that amount of coffee")
-    else:
-        print(f"Yes, I can make that amount of coffee (and even {m-n} more than that")
-
 
 def verify_validity(coffee,state):
     for ingredient in ["water","milk","bean"]:
@@ -58,12 +45,6 @@ def verify_validity(coffee,state):
             return False
         print("I have enough resources, making you a coffee!")
         return True
-
-
-def coffeeMachine():
-    ingredients=fill_machine()
-    n = int(input("write how many cups of coffee you will need:"))
-    verify(n,ingredients)
 
 def buyCoffee():
     try:
@@ -75,48 +56,6 @@ def buyCoffee():
 
 
 
-def updateState(action,state,selected=""):
-    """
-    :param action: fill buy take
-    :param state:  { water , milk , bean, cup , money }
-    :param selected:
-    :return: state updated
-    """
-    if action == "buy":
-        for type in ["water","milk","bean"]:
-            state[type] -= recipes[selected][type]
-        state["money"]+=recipes[selected]["price"]
-        state["cup"]-=1
-
-    elif action == "fill":
-        for type in ["water","milk","bean","cup"]:
-            state[type]+=selected[type]
-    else:
-        state["money"]=0
-
-    return state
-
-
-def actions(state,action):
-
-    if action=="remaining":
-        render_state(state)
-
-    elif action=="buy":
-        coffeeSelected=buyCoffee()
-
-        if  coffeeSelected in coffees and verify_validity(coffeeSelected,state):
-            state=updateState("buy",state,coffeeSelected)
-
-    elif action=="fill":
-        amountIngredients=fill_machine()
-        state=updateState("fill",state,amountIngredients)
-
-    elif action=="take":
-        amount=state["money"]
-        state=updateState("take",state)
-    return state
-
 
 def render_state(state):
 
@@ -127,19 +66,60 @@ def render_state(state):
 {state["cup"]} of disposable cups
 ${state["money"]} of money''')
 
-def coffee_machine(state):
-     # render_state(state)
-     # print()
-     while True:
+class Machine:
 
-         action=input("Write action (buy, fill, take, remaining, exit)")
-         print()
-         if action=="exit":
-             break
-         state=actions(state,action)
-         print()
-         #render_state(state)
+    def __init__(self,state):
+        """
+        state={water,cup,milk,money}
+        """
+        self.state=state
 
+    def start(self):
+         while True:
+             action=input("Write action (buy, fill, take, remaining, exit)")
+             print()
+             if action=="exit":
+                 break
+             self.actions(action)
+             print()
+
+    def actions(self,action):
+        if action=="remaining":
+            render_state(self.state)
+
+        elif action=="buy":
+            coffeeSelected=buyCoffee()
+            if  coffeeSelected in coffees and verify_validity(coffeeSelected,self.state):
+                self.state=self.updateState("buy",coffeeSelected)
+
+        elif action=="fill":
+            amountIngredients=fill_machine()
+            self.state=self.updateState("fill",amountIngredients)
+
+        elif action=="take":
+           # amount=self.state["money"]
+            self.state=self.updateState("take")
+
+    def updateState(self,action,selected=""):
+        """
+        :param action: fill buy take
+        :param state:  { water , milk , bean, cup , money }
+        :param selected:
+        :return: state updated
+        """
+        if action == "buy":
+            for type in ["water","milk","bean"]:
+                self.state[type] -= recipes[selected][type]
+            self.state["money"]+=recipes[selected]["price"]
+            self.state["cup"]-=1
+
+        elif action == "fill":
+            for type in ["water","milk","bean","cup"]:
+                self.state[type]+=selected[type]
+        else:
+            self.state["money"]=0
+
+        return state
 
 
 
@@ -148,6 +128,7 @@ if __name__=="__main__":
     state={
         "water":400,"milk":540,"bean":120,"money":550,"cup":9
     }
-    coffee_machine(state)
+    machine=Machine(state)
+    machine.start()
 
 
