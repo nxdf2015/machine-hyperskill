@@ -1,4 +1,4 @@
-# Write your code her
+
 
 recipes={
             "espresso":{
@@ -52,10 +52,6 @@ def buyCoffee():
         return coffees[choice - 1]
     except:
         return "back"
-
-
-
-
 
 def render_state(state):
 
